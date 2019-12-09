@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -21,8 +22,21 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
+
+import lecho.lib.hellocharts.model.Axis;
+import lecho.lib.hellocharts.model.AxisValue;
+import lecho.lib.hellocharts.model.Line;
+import lecho.lib.hellocharts.model.LineChartData;
+import lecho.lib.hellocharts.model.PointValue;
+import lecho.lib.hellocharts.model.Viewport;
+import lecho.lib.hellocharts.view.LineChartView;
 
 import static android.app.AlertDialog.Builder;
 
@@ -47,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         MainActivityContext = this;
 
         loadMap();
+
+        showLineGraph();
 
         Toast.makeText(this, "Size: " + timeRecordsMap.size(), Toast.LENGTH_LONG).show();
 
@@ -95,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(mainContext, "Chosen time: " + dateTime + " Chosen value: " + chosenValue, Toast.LENGTH_LONG).show();
                                 timeRecordsMap.put(date, chosenValue);
                                 saveMap();
+                                showLineGraph();
                                 return;
                             }
                         });
@@ -146,6 +163,62 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadMap() {
         timeRecordsMap = Utils.loadMap(MainActivityContext);
+    }
+
+    private void showLineGraph() {
+        LineChartView lineChartView = findViewById(R.id.chart);
+        String[] xAxisData = new String[timeRecordsMap.keySet().size()];
+
+        ArrayList<String> strList = new ArrayList<>();
+        for (Calendar cal: timeRecordsMap.keySet()) {
+            strList.add(Utils.getStringFromCalendar(cal));
+        }
+        strList.toArray(xAxisData);
+
+
+        Float[] yAxisData = new Float[timeRecordsMap.values().size()];
+        timeRecordsMap.values().toArray(yAxisData);
+
+        List yAxisValues = new ArrayList();
+        List xAxisValues = new ArrayList();
+
+        Line line = new Line(yAxisValues).setColor(R.color.colorPrimary);
+
+        for(int i = 0; i < xAxisData.length; i++){
+            xAxisValues.add(i, new AxisValue(i).setLabel(xAxisData[i]));
+        }
+
+        for (int i = 0; i < yAxisData.length; i++){
+            yAxisValues.add(new PointValue(i, yAxisData[i]));
+        }
+
+        List lines = new ArrayList();
+        lines.add(line);
+
+        LineChartData data = new LineChartData();
+        data.setLines(lines);
+
+        Axis axis = new Axis();
+        axis.setValues(xAxisValues);
+        axis.setTextSize(12);
+        axis.setTextColor(R.color.colorPrimary);
+        axis.setHasTiltedLabels(true);
+        data.setAxisXBottom(axis);
+
+        Axis yAxis = new Axis();
+        yAxis.setName("kWh");
+        yAxis.setTextColor(R.color.colorPrimary);
+        yAxis.setTextSize(12);
+        data.setAxisYLeft(yAxis);
+
+        lineChartView.setLineChartData(data);
+        Viewport viewport = new Viewport(lineChartView.getMaximumViewport());
+        viewport.top = 110;
+        lineChartView.setZoomEnabled(true);
+        lineChartView.setScrollEnabled(true);
+        lineChartView.setMaximumViewport(viewport);
+        lineChartView.setCurrentViewport(viewport);
+
     }
 
 }
