@@ -53,7 +53,7 @@ class Utils {
         return format.format(date.getTime());
     }
 
-    private static Calendar getCalendarFromString(Context context, String date) {
+    static Calendar getCalendarFromString(Context context, String date) {
         Calendar cal = Calendar.getInstance();
         Locale currentLocale = context.getResources().getConfiguration().locale;
         SimpleDateFormat sdf = new SimpleDateFormat(DATETIMEPATTERN, currentLocale);

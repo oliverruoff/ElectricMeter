@@ -26,6 +26,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -78,6 +79,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        loadMap();
+        showLineGraph();
+    }
 
     private void onAddClicked(final Context mainContext) {
 
@@ -126,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                         alert.show();
                         Log.v(TAG, "The chosen date time " + date.getTime());
                     }
-                }, currentDate.get(Calendar.HOUR_OF_DAY), currentDate.get(Calendar.MINUTE), false).show();
+                }, currentDate.get(Calendar.HOUR_OF_DAY), currentDate.get(Calendar.MINUTE), true).show();
             }
         }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE)).show();
 
@@ -182,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         List yAxisValues = new ArrayList();
         List xAxisValues = new ArrayList();
 
-        Line line = new Line(yAxisValues).setColor(R.color.colorPrimary);
+        Line line = new Line(yAxisValues).setColor(Color.WHITE);
 
         for(int i = 0; i < xAxisData.length; i++){
             xAxisValues.add(i, new AxisValue(i).setLabel(xAxisData[i]));
@@ -201,19 +208,19 @@ public class MainActivity extends AppCompatActivity {
         Axis axis = new Axis();
         axis.setValues(xAxisValues);
         axis.setTextSize(12);
-        axis.setTextColor(R.color.colorPrimary);
+        axis.setTextColor(Color.WHITE);
         axis.setHasTiltedLabels(true);
         data.setAxisXBottom(axis);
 
         Axis yAxis = new Axis();
         yAxis.setName("kWh");
-        yAxis.setTextColor(R.color.colorPrimary);
+        yAxis.setTextColor(Color.WHITE);
         yAxis.setTextSize(12);
         data.setAxisYLeft(yAxis);
 
         lineChartView.setLineChartData(data);
         Viewport viewport = new Viewport(lineChartView.getMaximumViewport());
-        viewport.top = 110;
+        viewport.top = Collections.max(timeRecordsMap.values());
         lineChartView.setZoomEnabled(true);
         lineChartView.setScrollEnabled(true);
         lineChartView.setMaximumViewport(viewport);
