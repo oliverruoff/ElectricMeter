@@ -16,7 +16,7 @@ import java.util.TreeMap;
 
 import static android.content.Context.MODE_PRIVATE;
 
-class Utils {
+class MyUtils {
 
     private static String DATETIMEPATTERN = "yyyy-MM-dd'T'HH:mm";
     private static String SHAREDPREFERENCESTIMERECORDSMAP = "savedMapName";

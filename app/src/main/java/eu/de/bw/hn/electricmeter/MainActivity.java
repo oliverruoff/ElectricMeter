@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -19,25 +21,22 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.utils.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 import java.util.TreeMap;
-
-import lecho.lib.hellocharts.model.Axis;
-import lecho.lib.hellocharts.model.AxisValue;
-import lecho.lib.hellocharts.model.Line;
-import lecho.lib.hellocharts.model.LineChartData;
-import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.Viewport;
-import lecho.lib.hellocharts.view.LineChartView;
 
 import static android.app.AlertDialog.Builder;
 
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 chosenValue = Float.parseFloat(input.getText().toString());
                                 Log.d("", "Chosen value : " + chosenValue);
-                                String dateTime = Utils.getStringFromCalendar(date);
+                                String dateTime = MyUtils.getStringFromCalendar(date);
                                 Toast.makeText(mainContext, "Chosen time: " + dateTime + " Chosen value: " + chosenValue, Toast.LENGTH_LONG).show();
                                 timeRecordsMap.put(date, chosenValue);
                                 saveMap();
@@ -165,66 +164,105 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void saveMap() {
-        Utils.saveMap(MainActivityContext, timeRecordsMap);
+        MyUtils.saveMap(MainActivityContext, timeRecordsMap);
     }
 
     private void loadMap() {
-        timeRecordsMap = Utils.loadMap(MainActivityContext);
+        timeRecordsMap = MyUtils.loadMap(MainActivityContext);
     }
 
     private void showLineGraph() {
-        LineChartView lineChartView = findViewById(R.id.chart);
-        String[] xAxisData = new String[timeRecordsMap.keySet().size()];
+        LineChart mChart = findViewById(R.id.chart);
+        XAxis xAxis=mChart.getXAxis();
+        xAxis.setLabelRotationAngle(45);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        mChart.setTouchEnabled(true);
+        mChart.setPinchZoom(true);
+        mChart.getDescription().setText("kWh / Time");
+        mChart.getLegend().setEnabled(false);
 
-        ArrayList<String> strList = new ArrayList<>();
+        ArrayList<Entry> values = new ArrayList<>();
         for (Calendar cal: timeRecordsMap.keySet()) {
-            strList.add(Utils.getStringFromCalendar(cal));
-        }
-        strList.toArray(xAxisData);
-
-
-        Float[] yAxisData = new Float[timeRecordsMap.values().size()];
-        timeRecordsMap.values().toArray(yAxisData);
-
-        List yAxisValues = new ArrayList();
-        List xAxisValues = new ArrayList();
-
-        Line line = new Line(yAxisValues).setColor(Color.WHITE);
-
-        for(int i = 0; i < xAxisData.length; i++){
-            xAxisValues.add(i, new AxisValue(i).setLabel(xAxisData[i]));
+            long x = cal.getTimeInMillis();
+            values.add(new Entry(x, timeRecordsMap.get(cal)));
         }
 
-        for (int i = 0; i < yAxisData.length; i++){
-            yAxisValues.add(new PointValue(i, yAxisData[i]));
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis((long) value);
+                String calStr = MyUtils.getStringFromCalendar(cal);
+                return calStr;
+            }
+        });
+
+        LineDataSet set1;
+        if (mChart.getData() != null &&
+                mChart.getData().getDataSetCount() > 0) {
+            set1 = (LineDataSet) mChart.getData().getDataSetByIndex(0);
+            set1.setValues(values);
+            mChart.getData().notifyDataChanged();
+            mChart.notifyDataSetChanged();
+        } else {
+            set1 = new LineDataSet(values, "");
+            //set1.setDrawIcons(false);
+            set1.enableDashedLine(10f, 5f, 0f);
+            set1.enableDashedHighlightLine(10f, 5f, 0f);
+            set1.setColor(Color.DKGRAY);
+            set1.setCircleColor(Color.DKGRAY);
+            set1.setLineWidth(1f);
+            set1.setCircleRadius(3f);
+            set1.setDrawCircleHole(false);
+            set1.setValueTextSize(9f);
+            set1.setDrawFilled(true);
+            set1.setFormLineWidth(1f);
+            set1.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
+            set1.setFormSize(15.f);
+            if (Utils.getSDKInt() >= 18) {
+                Drawable drawable = ContextCompat.getDrawable(this, R.drawable.fade_blue);
+                set1.setFillDrawable(drawable);
+            } else {
+                set1.setFillColor(Color.DKGRAY);
+            }
+            ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+            dataSets.add(set1);
+            LineData data = new LineData(dataSets);
+            mChart.setData(data);
         }
+        if (mChart.getData() != null &&
+                mChart.getData().getDataSetCount() > 0) {
+            set1 = (LineDataSet) mChart.getData().getDataSetByIndex(0);
+            set1.setValues(values);
+            mChart.getData().notifyDataChanged();
+            mChart.notifyDataSetChanged();
+        } else {
+            set1 = new LineDataSet(values, "");
+            // set1.setDrawIcons(false);
+            set1.enableDashedLine(10f, 5f, 0f);
+            set1.enableDashedHighlightLine(10f, 5f, 0f);
+            set1.setColor(Color.DKGRAY);
+            set1.setCircleColor(Color.DKGRAY);
+            set1.setLineWidth(1f);
+            set1.setCircleRadius(3f);
+            set1.setDrawCircleHole(false);
+            set1.setValueTextSize(9f);
+            set1.setDrawFilled(true);
+            set1.setFormLineWidth(1f);
+            set1.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
+            set1.setFormSize(15.f);
+            if (Utils.getSDKInt() >= 18) {
+                Drawable drawable = ContextCompat.getDrawable(this, R.drawable.fade_blue);
+                set1.setFillDrawable(drawable);
+            } else {
+                set1.setFillColor(Color.DKGRAY);
+            }
 
-        List lines = new ArrayList();
-        lines.add(line);
-
-        LineChartData data = new LineChartData();
-        data.setLines(lines);
-
-        Axis axis = new Axis();
-        axis.setValues(xAxisValues);
-        axis.setTextSize(12);
-        axis.setTextColor(Color.WHITE);
-        axis.setHasTiltedLabels(true);
-        data.setAxisXBottom(axis);
-
-        Axis yAxis = new Axis();
-        yAxis.setName("kWh");
-        yAxis.setTextColor(Color.WHITE);
-        yAxis.setTextSize(12);
-        data.setAxisYLeft(yAxis);
-
-        lineChartView.setLineChartData(data);
-        Viewport viewport = new Viewport(lineChartView.getMaximumViewport());
-        viewport.top = Collections.max(timeRecordsMap.values());
-        lineChartView.setZoomEnabled(true);
-        lineChartView.setScrollEnabled(true);
-        lineChartView.setMaximumViewport(viewport);
-        lineChartView.setCurrentViewport(viewport);
+            ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+            dataSets.add(set1);
+            LineData data = new LineData(dataSets);
+            mChart.setData(data);
+        }
 
     }
 

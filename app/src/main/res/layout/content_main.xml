@@ -8,15 +8,9 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <lecho.lib.hellocharts.view.LineChartView
+    <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginBottom="15dp"
-        android:layout_marginTop="15dp"
-        tools:layout_editor_absoluteX="-16dp"
-        tools:layout_editor_absoluteY="-195dp" />
+        android:layout_height="300dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

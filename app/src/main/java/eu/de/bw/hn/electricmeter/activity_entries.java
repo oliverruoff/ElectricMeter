@@ -4,14 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -32,7 +29,7 @@ public class activity_entries extends AppCompatActivity {
         for (Map.Entry<Calendar, Float> entry : calFloatMap.entrySet()) {
             Calendar key = entry.getKey();
             float value = entry.getValue();
-            stringList.add(Utils.getStringFromCalendar(key) + ": " + value);
+            stringList.add(MyUtils.getStringFromCalendar(key) + ": " + value);
         }
 
         return stringList;
@@ -56,7 +53,7 @@ public class activity_entries extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entries);
 
-        timeRecordsMap = Utils.loadMap(this);
+        timeRecordsMap = MyUtils.loadMap(this);
         listView = (ListView) findViewById(R.id.listView);
         entriesContext = this;
         displayItems(this);
@@ -70,11 +67,11 @@ public class activity_entries extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         ArrayList<String> stringList = stringListFromCalendarFloatMap(timeRecordsMap);
                         String desiredItem = stringList.get(pos);
-                        Calendar removeKey = Utils.getCalendarFromString(entriesContext, desiredItem);
+                        Calendar removeKey = MyUtils.getCalendarFromString(entriesContext, desiredItem);
                         timeRecordsMap.remove(removeKey);
                         // Toast.makeText(entriesContext, "Removed key: " + removeKey, Toast.LENGTH_SHORT).show();
                         Log.v("long clicked","pos: " + pos);
-                        Utils.saveMap(entriesContext, timeRecordsMap);
+                        MyUtils.saveMap(entriesContext, timeRecordsMap);
                         displayItems(entriesContext);
                         return;
                     }
