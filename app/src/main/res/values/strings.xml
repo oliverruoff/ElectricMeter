@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Hauptstr.7, Untergruppenbach</string>
-    <string name="action_settings">Records</string>
+    <string name="app_name">Tracker</string>
+    <string name="action_settings">Measurements</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

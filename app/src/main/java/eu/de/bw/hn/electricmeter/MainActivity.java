@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -48,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     TreeMap<Calendar, Float> timeRecordsMap = new TreeMap<>();
 
     Context MainActivityContext;
+    TextView averageCurrentTextView;
+    TextView averageOverallTextView;
 
 
     float chosenValue;
@@ -61,8 +64,11 @@ public class MainActivity extends AppCompatActivity {
 
         MainActivityContext = this;
 
+        initViews(this);
+
         loadMap();
 
+        fillTextViews();
         showLineGraph();
 
         Toast.makeText(this, "Size: " + timeRecordsMap.size(), Toast.LENGTH_LONG).show();
@@ -78,6 +84,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void initViews(Context context){
+        averageCurrentTextView = (TextView) findViewById(R.id.averageCurrent);
+        averageOverallTextView = (TextView) findViewById(R.id.averageOverall);
+    }
+
+    private void fillTextViews() {
+        if (timeRecordsMap.size() < 2) {
+            return;
+        }
+        // Average Overall
+        Calendar startDate = (Calendar) timeRecordsMap.keySet().toArray()[0];
+        Calendar endDate = (Calendar) timeRecordsMap.keySet().toArray()[timeRecordsMap.size()-1];
+        float startNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[0]);
+        float endNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[timeRecordsMap.size()-1]);
+        averageOverallTextView.setText(String.valueOf(getAverage(startDate, endDate, startNo, endNo)));
+
+        // Average Current
+        Calendar currentStartDate = (Calendar) timeRecordsMap.keySet().toArray()[timeRecordsMap.size()-2];
+        float currentStartNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[timeRecordsMap.size()-2]);
+        averageCurrentTextView.setText(String.valueOf(getAverage(currentStartDate, endDate, currentStartNo, endNo)));
+    }
+
+    private float getAverage(Calendar startDate, Calendar endDate, float startNo, float endNo) {
+        long timeDeltaMillis = endDate.getTime().getTime() - startDate.getTime().getTime();
+        float measurementDelta = endNo - startNo;
+        float milliAverage = measurementDelta / timeDeltaMillis;
+        return milliAverage * 1000 * 60 * 60 * 24;
+    }
+
 
     @Override
     public void onResume(){
@@ -100,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                         date.set(Calendar.HOUR_OF_DAY, hourOfDay);
                         date.set(Calendar.MINUTE, minute);
                         Builder alert = new Builder(mainContext);
-                        alert.setTitle("Enter current value");
+                        alert.setTitle("Enter measurement");
                         // Set an EditText view to get user input
                         final EditText input = new EditText(mainContext);
                         input.setInputType(InputType.TYPE_CLASS_NUMBER |
@@ -191,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
 
         mChart.setTouchEnabled(true);
         mChart.setPinchZoom(true);
-        mChart.getDescription().setText("kWh / Time");
+        mChart.getDescription().setText(""); // Appears in the bottom right corner of the graph
         mChart.getDescription().setTextColor(getResources().getColor(R.color.colorAccent));
         mChart.getLegend().setEnabled(false);
 
