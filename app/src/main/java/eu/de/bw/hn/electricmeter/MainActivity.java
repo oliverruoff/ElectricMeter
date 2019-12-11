@@ -176,9 +176,19 @@ public class MainActivity extends AppCompatActivity {
         XAxis xAxis=mChart.getXAxis();
         xAxis.setLabelRotationAngle(45);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextColor(Color.WHITE);
+
+        mChart.getAxisLeft().setTextColor(Color.WHITE);
+
+        mChart.getAxisRight().setEnabled(false);
+
+        mChart.getAxisLeft().setDrawGridLines(false);
+        mChart.getXAxis().setDrawGridLines(false);
+
         mChart.setTouchEnabled(true);
         mChart.setPinchZoom(true);
         mChart.getDescription().setText("kWh / Time");
+        mChart.getDescription().setTextColor(Color.WHITE);
         mChart.getLegend().setEnabled(false);
 
         ArrayList<Entry> values = new ArrayList<>();
@@ -208,56 +218,23 @@ public class MainActivity extends AppCompatActivity {
             set1 = new LineDataSet(values, "");
             //set1.setDrawIcons(false);
             set1.enableDashedLine(10f, 5f, 0f);
-            set1.enableDashedHighlightLine(10f, 5f, 0f);
-            set1.setColor(Color.DKGRAY);
-            set1.setCircleColor(Color.DKGRAY);
+            set1.setColor(Color.WHITE);
+            set1.setCircleColor(Color.WHITE);
             set1.setLineWidth(1f);
             set1.setCircleRadius(3f);
             set1.setDrawCircleHole(false);
             set1.setValueTextSize(9f);
-            set1.setDrawFilled(true);
+            set1.setValueTextColor(Color.WHITE);
             set1.setFormLineWidth(1f);
-            set1.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
             set1.setFormSize(15.f);
+            /*set1.setDrawFilled(true);
             if (Utils.getSDKInt() >= 18) {
-                Drawable drawable = ContextCompat.getDrawable(this, R.drawable.fade_blue);
+                Drawable drawable = ContextCompat.getDrawable(this, R.drawable.fade_color);
                 set1.setFillDrawable(drawable);
             } else {
-                set1.setFillColor(Color.DKGRAY);
+                set1.setFillColor(Color.WHITE);
             }
-            ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-            dataSets.add(set1);
-            LineData data = new LineData(dataSets);
-            mChart.setData(data);
-        }
-        if (mChart.getData() != null &&
-                mChart.getData().getDataSetCount() > 0) {
-            set1 = (LineDataSet) mChart.getData().getDataSetByIndex(0);
-            set1.setValues(values);
-            mChart.getData().notifyDataChanged();
-            mChart.notifyDataSetChanged();
-        } else {
-            set1 = new LineDataSet(values, "");
-            // set1.setDrawIcons(false);
-            set1.enableDashedLine(10f, 5f, 0f);
-            set1.enableDashedHighlightLine(10f, 5f, 0f);
-            set1.setColor(Color.DKGRAY);
-            set1.setCircleColor(Color.DKGRAY);
-            set1.setLineWidth(1f);
-            set1.setCircleRadius(3f);
-            set1.setDrawCircleHole(false);
-            set1.setValueTextSize(9f);
-            set1.setDrawFilled(true);
-            set1.setFormLineWidth(1f);
-            set1.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
-            set1.setFormSize(15.f);
-            if (Utils.getSDKInt() >= 18) {
-                Drawable drawable = ContextCompat.getDrawable(this, R.drawable.fade_blue);
-                set1.setFillDrawable(drawable);
-            } else {
-                set1.setFillColor(Color.DKGRAY);
-            }
-
+             */
             ArrayList<ILineDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1);
             LineData data = new LineData(dataSets);
