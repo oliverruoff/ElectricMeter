@@ -25,9 +25,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -38,6 +42,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TreeMap;
 
 import static android.app.AlertDialog.Builder;
@@ -70,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
         fillTextViews();
         showLineGraph();
+        showBarChart();
 
         Toast.makeText(this, "Size: " + timeRecordsMap.size(), Toast.LENGTH_LONG).show();
 
@@ -120,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         loadMap();
         showLineGraph();
+        showBarChart();
+        fillTextViews();
     }
 
     private void onAddClicked(final Context mainContext) {
@@ -155,6 +163,8 @@ public class MainActivity extends AppCompatActivity {
                                 timeRecordsMap.put(date, chosenValue);
                                 saveMap();
                                 showLineGraph();
+                                showBarChart();
+                                fillTextViews();
                                 return;
                             }
                         });
@@ -208,6 +218,47 @@ public class MainActivity extends AppCompatActivity {
         timeRecordsMap = MyUtils.loadMap(MainActivityContext);
     }
 
+    private void showBarChart() {
+        if (timeRecordsMap.size() < 1) {
+            return;
+        }
+        BarChart bChart = findViewById(R.id.barChart);
+        List<BarEntry> entries = new ArrayList<>();
+        for (int i=0; i<timeRecordsMap.size()-1; i++) {
+            Calendar startDate = (Calendar) timeRecordsMap.keySet().toArray()[i];
+            Calendar endDate = (Calendar) timeRecordsMap.keySet().toArray()[i+1];
+            float startNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[i]);
+            float endNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[i+1]);
+            float average = getAverage(startDate, endDate, startNo, endNo);
+            float millisEnd = ((Calendar) timeRecordsMap.keySet().toArray()[i+1]).getTimeInMillis();
+            entries.add(new BarEntry(millisEnd, average));
+        }
+
+        bChart.getDescription().setTextColor(getResources().getColor(R.color.colorAccent));
+        bChart.getAxisLeft().setTextColor(getResources().getColor((R.color.colorAccent)));
+        bChart.getDescription().setText(""); // Appears in the bottom right corner of the graph
+        bChart.getDescription().setTextColor(getResources().getColor(R.color.colorAccent));
+        bChart.getLegend().setEnabled(false);
+        bChart.getAxisRight().disableGridDashedLine();
+        bChart.getAxisLeft().setDrawGridLines(false);
+        bChart.getAxisRight().setDrawGridLines(false);
+        bChart.getXAxis().setDrawGridLines(false);
+        bChart.getAxisRight().setDrawLabels(false);
+        bChart.getXAxis().setDrawLabels(false);
+
+
+        BarDataSet set = new BarDataSet(entries, "");
+        set.setValueTextColor(getResources().getColor(R.color.colorAccent));
+        set.setColor(getResources().getColor(R.color.colorPrimary));
+        set.setBarBorderColor(getResources().getColor(R.color.colorAccent));
+        set.setBarBorderWidth(1f);
+        BarData data = new BarData(set);
+        data.setBarWidth(86400000f); // Millis of one day
+        bChart.setData(data);
+        bChart.setFitBars(true); // make the x-axis fit exactly all bars
+        bChart.invalidate(); // refresh
+    }
+
     private void showLineGraph() {
         if (timeRecordsMap.size() < 1) {
             return;
@@ -224,12 +275,12 @@ public class MainActivity extends AppCompatActivity {
 
         mChart.getAxisLeft().setDrawGridLines(false);
         mChart.getXAxis().setDrawGridLines(false);
-
+        mChart.getLegend().setEnabled(false);
         mChart.setTouchEnabled(true);
         mChart.setPinchZoom(true);
         mChart.getDescription().setText(""); // Appears in the bottom right corner of the graph
         mChart.getDescription().setTextColor(getResources().getColor(R.color.colorAccent));
-        mChart.getLegend().setEnabled(false);
+
 
         ArrayList<Entry> values = new ArrayList<>();
         for (Calendar cal: timeRecordsMap.keySet()) {
