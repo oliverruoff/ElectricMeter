@@ -40,6 +40,8 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     Context MainActivityContext;
     TextView averageCurrentTextView;
     TextView averageOverallTextView;
+    TextView averageYearTextView;
 
 
     float chosenValue;
@@ -91,9 +94,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void initViews(Context context){
+    private void initViews(Context context) {
         averageCurrentTextView = (TextView) findViewById(R.id.averageCurrent);
         averageOverallTextView = (TextView) findViewById(R.id.averageOverall);
+        averageYearTextView = (TextView) findViewById(R.id.averageYear);
     }
 
     private void fillTextViews() {
@@ -102,15 +106,19 @@ public class MainActivity extends AppCompatActivity {
         }
         // Average Overall
         Calendar startDate = (Calendar) timeRecordsMap.keySet().toArray()[0];
-        Calendar endDate = (Calendar) timeRecordsMap.keySet().toArray()[timeRecordsMap.size()-1];
+        Calendar endDate = (Calendar) timeRecordsMap.keySet().toArray()[timeRecordsMap.size() - 1];
         float startNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[0]);
-        float endNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[timeRecordsMap.size()-1]);
+        float endNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[timeRecordsMap.size() - 1]);
         averageOverallTextView.setText(String.valueOf(getAverage(startDate, endDate, startNo, endNo)));
 
         // Average Current
-        Calendar currentStartDate = (Calendar) timeRecordsMap.keySet().toArray()[timeRecordsMap.size()-2];
-        float currentStartNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[timeRecordsMap.size()-2]);
+        Calendar currentStartDate = (Calendar) timeRecordsMap.keySet().toArray()[timeRecordsMap.size() - 2];
+        float currentStartNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[timeRecordsMap.size() - 2]);
         averageCurrentTextView.setText(String.valueOf(getAverage(currentStartDate, endDate, currentStartNo, endNo)));
+
+        // Average Year
+        float averageYear = getAverage(startDate, endDate, startNo, endNo) * 365;
+        averageYearTextView.setText(String.valueOf(averageYear));
     }
 
     private float getAverage(Calendar startDate, Calendar endDate, float startNo, float endNo) {
@@ -122,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         loadMap();
         showLineGraph();
@@ -224,13 +232,13 @@ public class MainActivity extends AppCompatActivity {
         }
         BarChart bChart = findViewById(R.id.barChart);
         List<BarEntry> entries = new ArrayList<>();
-        for (int i=0; i<timeRecordsMap.size()-1; i++) {
+        for (int i = 0; i < timeRecordsMap.size() - 1; i++) {
             Calendar startDate = (Calendar) timeRecordsMap.keySet().toArray()[i];
-            Calendar endDate = (Calendar) timeRecordsMap.keySet().toArray()[i+1];
+            Calendar endDate = (Calendar) timeRecordsMap.keySet().toArray()[i + 1];
             float startNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[i]);
-            float endNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[i+1]);
+            float endNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[i + 1]);
             float average = getAverage(startDate, endDate, startNo, endNo);
-            float millisEnd = ((Calendar) timeRecordsMap.keySet().toArray()[i+1]).getTimeInMillis();
+            float millisEnd = ((Calendar) timeRecordsMap.keySet().toArray()[i + 1]).getTimeInMillis();
             entries.add(new BarEntry(millisEnd, average));
         }
 
@@ -264,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         LineChart mChart = findViewById(R.id.chart);
-        XAxis xAxis=mChart.getXAxis();
+        XAxis xAxis = mChart.getXAxis();
         xAxis.setLabelRotationAngle(30);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextColor(getResources().getColor(R.color.colorAccent));
@@ -283,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         ArrayList<Entry> values = new ArrayList<>();
-        for (Calendar cal: timeRecordsMap.keySet()) {
+        for (Calendar cal : timeRecordsMap.keySet()) {
             long x = cal.getTimeInMillis();
             values.add(new Entry(x, timeRecordsMap.get(cal)));
         }
