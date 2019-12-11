@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     TextView averageCurrentTextView;
     TextView averageOverallTextView;
     TextView averageYearTextView;
+    TextView totalLastTextView;
+    TextView lastYearTextView;
 
 
     float chosenValue;
@@ -80,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         showLineGraph();
         showBarChart();
 
-        Toast.makeText(this, "Size: " + timeRecordsMap.size(), Toast.LENGTH_LONG).show();
+        // Toast.makeText(this, "Size: " + timeRecordsMap.size(), Toast.LENGTH_LONG).show();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         final Context mainContext = this;
@@ -98,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
         averageCurrentTextView = (TextView) findViewById(R.id.averageCurrent);
         averageOverallTextView = (TextView) findViewById(R.id.averageOverall);
         averageYearTextView = (TextView) findViewById(R.id.averageYear);
+        totalLastTextView = (TextView) findViewById(R.id.totalLast);
+        lastYearTextView = (TextView) findViewById(R.id.lastYear);
     }
 
     private void fillTextViews() {
@@ -109,16 +113,27 @@ public class MainActivity extends AppCompatActivity {
         Calendar endDate = (Calendar) timeRecordsMap.keySet().toArray()[timeRecordsMap.size() - 1];
         float startNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[0]);
         float endNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[timeRecordsMap.size() - 1]);
-        averageOverallTextView.setText(String.valueOf(getAverage(startDate, endDate, startNo, endNo)));
+        String averageOverallStr = String.format("%.01f", getAverage(startDate, endDate, startNo, endNo));
+        averageOverallTextView.setText(averageOverallStr);
 
         // Average Current
         Calendar currentStartDate = (Calendar) timeRecordsMap.keySet().toArray()[timeRecordsMap.size() - 2];
         float currentStartNo = timeRecordsMap.get(timeRecordsMap.keySet().toArray()[timeRecordsMap.size() - 2]);
-        averageCurrentTextView.setText(String.valueOf(getAverage(currentStartDate, endDate, currentStartNo, endNo)));
+        String averageCurrentStr = String.format("%.01f", getAverage(currentStartDate, endDate, currentStartNo, endNo));
+        averageCurrentTextView.setText(averageCurrentStr);
 
         // Average Year
         float averageYear = getAverage(startDate, endDate, startNo, endNo) * 365;
-        averageYearTextView.setText(String.valueOf(averageYear));
+        String averageYearStr = String.format("%.01f", getAverage(startDate, endDate, startNo, endNo) * 365);
+        averageYearTextView.setText(averageYearStr);
+
+        // Total Last
+        String totalLastStr = String.format("%.01f", (endNo - currentStartNo));
+        totalLastTextView.setText(totalLastStr);
+
+        // Average Last Year
+        String averageLastYear = String.format("%.01f", getAverage(currentStartDate, endDate, currentStartNo, endNo) * 365);
+        lastYearTextView.setText(averageLastYear);
     }
 
     private float getAverage(Calendar startDate, Calendar endDate, float startNo, float endNo) {
@@ -252,8 +267,20 @@ public class MainActivity extends AppCompatActivity {
         bChart.getAxisRight().setDrawGridLines(false);
         bChart.getXAxis().setDrawGridLines(false);
         bChart.getAxisRight().setDrawLabels(false);
-        bChart.getXAxis().setDrawLabels(false);
+        bChart.getXAxis().setLabelRotationAngle(30);
+        bChart.getXAxis().setTextColor(getResources().getColor(R.color.colorAccent));
+        bChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        // bChart.getXAxis().setDrawLabels(false);
 
+        bChart.getXAxis().setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis((long) value);
+                String calStr = MyUtils.getStringFromCalendar(cal);
+                return calStr;
+            }
+        });
 
         BarDataSet set = new BarDataSet(entries, "");
         set.setValueTextColor(getResources().getColor(R.color.colorAccent));
@@ -263,6 +290,8 @@ public class MainActivity extends AppCompatActivity {
         BarData data = new BarData(set);
         data.setBarWidth(86400000f); // Millis of one day
         bChart.setData(data);
+        bChart.setPinchZoom(true);
+        set.setHighlightEnabled(false);
         bChart.setFitBars(true); // make the x-axis fit exactly all bars
         bChart.invalidate(); // refresh
     }
