@@ -2,6 +2,7 @@ package eu.de.bw.hn.electricmeter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -17,6 +18,8 @@ import java.util.TreeMap;
 import static android.content.Context.MODE_PRIVATE;
 
 class MyUtils {
+
+    static String TAG = "MyUtils";
 
     private static String DATETIMEPATTERN = "yyyy-MM-dd'T'HH:mm";
     private static String SHAREDPREFERENCESTIMERECORDSMAP = "savedMapName";

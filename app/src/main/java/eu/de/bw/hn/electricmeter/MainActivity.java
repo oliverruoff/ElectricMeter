@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.drawable.Drawable;
@@ -172,13 +173,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showLineGraph() {
+        if (timeRecordsMap.size() < 1) {
+            return;
+        }
         LineChart mChart = findViewById(R.id.chart);
         XAxis xAxis=mChart.getXAxis();
-        xAxis.setLabelRotationAngle(45);
+        xAxis.setLabelRotationAngle(30);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setTextColor(Color.WHITE);
+        xAxis.setTextColor(getResources().getColor(R.color.colorAccent));
 
-        mChart.getAxisLeft().setTextColor(Color.WHITE);
+        mChart.getAxisLeft().setTextColor(getResources().getColor(R.color.colorAccent));
 
         mChart.getAxisRight().setEnabled(false);
 
@@ -188,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         mChart.setTouchEnabled(true);
         mChart.setPinchZoom(true);
         mChart.getDescription().setText("kWh / Time");
-        mChart.getDescription().setTextColor(Color.WHITE);
+        mChart.getDescription().setTextColor(getResources().getColor(R.color.colorAccent));
         mChart.getLegend().setEnabled(false);
 
         ArrayList<Entry> values = new ArrayList<>();
@@ -214,27 +218,29 @@ public class MainActivity extends AppCompatActivity {
             set1.setValues(values);
             mChart.getData().notifyDataChanged();
             mChart.notifyDataSetChanged();
+
+            mChart.getData().setHighlightEnabled(false);
         } else {
             set1 = new LineDataSet(values, "");
             //set1.setDrawIcons(false);
             set1.enableDashedLine(10f, 5f, 0f);
-            set1.setColor(Color.WHITE);
-            set1.setCircleColor(Color.WHITE);
+            set1.setColor(getResources().getColor(R.color.colorAccent));
+            set1.setCircleColor(getResources().getColor(R.color.colorAccent));
             set1.setLineWidth(1f);
             set1.setCircleRadius(3f);
             set1.setDrawCircleHole(false);
             set1.setValueTextSize(9f);
-            set1.setValueTextColor(Color.WHITE);
+            set1.setValueTextColor(getResources().getColor(R.color.colorAccent));
             set1.setFormLineWidth(1f);
             set1.setFormSize(15.f);
-            /*set1.setDrawFilled(true);
+            set1.setDrawFilled(true);
             if (Utils.getSDKInt() >= 18) {
-                Drawable drawable = ContextCompat.getDrawable(this, R.drawable.fade_color);
+                Drawable drawable = ContextCompat.getDrawable(this, R.color.colorPrimary);
                 set1.setFillDrawable(drawable);
             } else {
                 set1.setFillColor(Color.WHITE);
             }
-             */
+
             ArrayList<ILineDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1);
             LineData data = new LineData(dataSets);
